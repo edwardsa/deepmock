@@ -16,14 +16,14 @@ import org.junit.runners.model.Statement;
  *
  * To apply this rule to your test class:
  * <code>
- *     @Rule
+ *     &#64;Rule
  *     DeepMockRule deepMockRule = new DeepMockRule();
  *
- *     @Subject
- *     @Resource // For spring injection
+ *     &#64;Subject
+ *     &#64;Resource // For spring injection
  *     MyService subject;
  *
- *     @Mock
+ *     &#64;Mock
  *     MyDao daoMock;
  * </code>
  * @see org.mockito.Mock
