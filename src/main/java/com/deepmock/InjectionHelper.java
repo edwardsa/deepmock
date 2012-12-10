@@ -1,17 +1,21 @@
 package com.deepmock;
 
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ReflectionUtils;
-
-import javax.annotation.Resource;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ReflectionUtils;
+
 public class InjectionHelper {
+    private static Log LOG = LogFactory.getLog(InjectionHelper.class); 
 
     public static List<Field> getInjectableFields(Object target) {
         List<Field> injectableFields = new ArrayList<Field>();
@@ -49,7 +53,7 @@ public class InjectionHelper {
             if (field != null) {
                 fields.add(field);
             } else {
-                System.out.println("Could not find field to inject mock into for write method: " + writeMethod);
+                LOG.debug("Could not find field to inject mock into for write method: " + writeMethod);
             }
         }
     }

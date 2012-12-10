@@ -1,17 +1,18 @@
 package com.deepmock;
 
-import com.deepmock.reflect.ProxyHelper;
-import org.mockito.Mock;
-import org.springframework.util.ReflectionUtils;
+import static com.deepmock.InjectionHelper.getInjectableFields;
+import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
+import static org.mockito.internal.util.reflection.Whitebox.setInternalState;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.deepmock.InjectionHelper.getInjectableFields;
-import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
-import static org.mockito.internal.util.reflection.Whitebox.setInternalState;
+import org.mockito.Mock;
+import org.springframework.util.ReflectionUtils;
+
+import com.deepmock.reflect.ProxyHelper;
 
 /**
  * This class controls the deep injection of mocks and the restoration of original state.  The mocks will be injected
@@ -20,37 +21,37 @@ import static org.mockito.internal.util.reflection.Whitebox.setInternalState;
  * It can be invoked in numerous ways from your test class:
  * <h2>Directly</h2>
  * This gives you the most control, but is also the most intrusive.
- * <code>
- *   @Before
+ * <pre>
+ *   &#64;Before
  *   public void before() {
  *       MockitoAnnotations.initMocks(this);
  *       deepMockHandler = new DeepMockHandler(this);
  *       deepMockHandler.injectMocksIntoObjectGraphOfSubject(false);
  *   }
  *
- *   @After
+ *   &#64;After
  *   public void after() {
  *       deepMockHandler.restoreOriginalFields();
  *   }
- * </code>
+ * </pre>
  *
  * <h2>As a Spring Junit Runner</h2>
  * This is probably the least intrusive but ties your test to spring.
- * <code>
- *   @RunWith(SpringWithMockitoRunner.class)
- *   @ContextConfiguration(locations = {"/myTest-applicationContext.xml"})
+ * <pre>
+ *   &#64;RunWith(SpringWithMockitoRunner.class)
+ *   &#64;ContextConfiguration(locations = {"/myTest-applicationContext.xml"})
  *   public final class MyITest {
  *   ...
- * </code>
+ * </pre>
  *
  * <h2>As a Rule</h2>
  * This allows you to use whichever runner you like.  Note that the {@link Subject} must be fully instantiated
  * at the point that the rule is invoked.  Because Rules are invoked after Before annotated methods, you can not rely on
  * Before method to setup your subject.
- * <code>
- *   @Rule
+ * <pre>
+ *   &#64;Rule
  *   public DeepMockRule deepMockRule = new DeepMockRule();
- * </code>
+ * </pre>
  *
  * @see DeepMockRule
  * @see SpringWithMockitoRunner
