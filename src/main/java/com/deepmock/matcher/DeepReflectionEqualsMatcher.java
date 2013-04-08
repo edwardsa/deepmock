@@ -28,8 +28,8 @@ public class DeepReflectionEqualsMatcher<T> extends BaseMatcher<T> {
     /**
      * Reflection equality test that deeply reflects through the object graph 
      * @param expected The expected value
-     * @param veryDeep Whether to use .equals methods when found on objects.
-     * If true, will ignore .equals on all objects excpet core java
+     * @param veryDeep Whether to ignore .equals methods when found on objects.
+     * If true, will ignore .equals on all objects except core java
      * @param <T> The type of object being tested for equality
      */
     public static <T> T refEq(T expected, boolean veryDeep) {
