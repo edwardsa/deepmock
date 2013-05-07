@@ -1,18 +1,19 @@
 package com.deepmock;
 
-import static com.deepmock.InjectionHelper.getInjectableFields;
-import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
-import static org.mockito.internal.util.reflection.Whitebox.setInternalState;
+import com.deepmock.reflect.ProxyHelper;
+import org.mockito.Mock;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.mockito.Mock;
-import org.springframework.util.ReflectionUtils;
-
-import com.deepmock.reflect.ProxyHelper;
+import static com.deepmock.InjectionHelper.getInjectableFields;
+import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
+import static org.mockito.internal.util.reflection.Whitebox.setInternalState;
 
 /**
  * This class controls the deep injection of mocks and the restoration of original state.  The mocks will be injected
@@ -93,6 +94,12 @@ public final class DeepMockHandler {
         if (classStack.contains(target.getClass())) {
             return; // prevent endless loop when class contains an instance of itself
         }
+        if (target.getClass().isArray()) {
+            Object[] arr = ((Object[])target);
+            for (Object o : arr) {
+                recurseObjectGraphInjectingMocks(o, mocks, new ArrayList<Class>(classStack), onlySpringFields);
+            }
+        }
         classStack.add(target.getClass());
         List<Field> injectableFields = onlySpringFields ? getInjectableFields(target) : getAllFields(target);
         for (Field field : injectableFields) {
@@ -109,7 +116,7 @@ public final class DeepMockHandler {
         ReflectionUtils.doWithFields(target.getClass(), new ReflectionUtils.FieldCallback() {
             @Override
             public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-                if (!field.getType().getName().startsWith("java.lang")) {
+                if (!ClassUtils.isPrimitiveOrWrapper(field.getType()) && !ClassUtils.isPrimitiveArray(field.getType()) && !field.getType().getName().startsWith("java.lang")) {
                     fields.add(field);
                 }
             }
@@ -124,7 +131,13 @@ public final class DeepMockHandler {
         for (Map.Entry<Class<?>, Object> mock : mocks.entrySet()) {
             if (field.getType() == mock.getKey()) {
                 storeOriginalValue(target, field);
-                replaceFieldWithMock(target, field, mock);
+                replaceFieldWithMock(target, field, mock.getValue());
+                return true;
+            } else if (field.getType().isArray() && field.getType().getComponentType() == mock.getKey()) {
+                storeOriginalValue(target, field);
+                Object arr = Array.newInstance(mock.getKey(), 1);
+                Array.set(arr, 0, mock);
+                replaceFieldWithMock(target, field, arr);
                 return true;
             }
         }
@@ -162,8 +175,8 @@ public final class DeepMockHandler {
         originalFields.add(new FieldAndValue(target, field, fieldValue));
     }
 
-    private void replaceFieldWithMock(Object target, Field field, Map.Entry<Class<?>, Object> mock) {
-        setInternalState(target, field.getName(), mock.getValue());
+    private void replaceFieldWithMock(Object target, Field field, Object mockValue) {
+        setInternalState(target, field.getName(), mockValue);
     }
 
 }
