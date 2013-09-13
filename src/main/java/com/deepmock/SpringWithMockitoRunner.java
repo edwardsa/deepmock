@@ -23,13 +23,17 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * public class Test {
  *     &#064;Mock private Object mock1;
  *     &#064;Mock private Object mock2;
+ *
+ *     private Object mock3 = Mockito.mock(Object.class);
+ *     &#064;Spy private List&lt;Object&gt; spy1 = Lists.newArrayList(mock3);
+ *
  *     &#064;Resource @Subject private Object subject;
  *     &#064;Test public void test() { subject.execute(); }
  *     ...
  * }
  * </pre>
  * <p/>
- * In the above, <code>subject</code> would be wired with <code>mock1</code> and <code>mock2</code> iff they were
+ * In the above, <code>subject</code> would be wired with <code>mock1</code>, <code>mock2</code> and <code>spy1</code> iff they were
  * dependencies.
  * <p/>
  * <p/>
