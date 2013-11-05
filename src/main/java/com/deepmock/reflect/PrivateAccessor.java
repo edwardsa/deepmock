@@ -1,8 +1,8 @@
 package com.deepmock.reflect;
 
-import java.lang.reflect.Field;
-
 import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Field;
 
 public final class PrivateAccessor {
     public static <T> T getFieldFromObjectOrProxyTarget(Object object, String fieldName) {
@@ -18,6 +18,10 @@ public final class PrivateAccessor {
 
     public static void setField(Object obj, String fieldName, Object value) {
         Field field = ReflectionUtils.findField(obj.getClass(), fieldName);
+        setField(obj, field, value);
+    }
+
+    public static void setField(Object obj, Field field, Object value) {
         ReflectionUtils.makeAccessible(field);
         ReflectionUtils.setField(field, obj, value);
     }

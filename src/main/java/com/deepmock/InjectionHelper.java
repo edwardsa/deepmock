@@ -1,27 +1,36 @@
 package com.deepmock;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Resource;
-
+import com.deepmock.reflect.PrivateAccessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 
+import javax.annotation.Resource;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 public class InjectionHelper {
-    private static Log LOG = LogFactory.getLog(InjectionHelper.class); 
+    private static Log LOG = LogFactory.getLog(InjectionHelper.class);
 
     public static List<Field> getInjectableFields(Object target) {
         List<Field> injectableFields = new ArrayList<Field>();
         injectableFields.addAll(getAutowiredFields(target));
         injectableFields.addAll(getFieldsForSetters(target));
         return injectableFields;
+    }
+
+    public static void injectFieldByType(Object object, Object fieldValue) {
+        List<Field> injectableFields = InjectionHelper.getInjectableFields(object);
+        for (Field injectableField : injectableFields) {
+            if (injectableField.getGenericType().equals(fieldValue.getClass())) {
+                PrivateAccessor.setField(object, injectableField, fieldValue);
+            }
+        }
     }
 
     private static List<Field> getAutowiredFields(Object target) {
