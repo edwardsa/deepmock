@@ -27,8 +27,9 @@ public class InjectionHelper {
     public static void injectFieldByType(Object object, Object fieldValue) {
         List<Field> injectableFields = InjectionHelper.getInjectableFields(object);
         for (Field injectableField : injectableFields) {
-            if (injectableField.getGenericType().equals(fieldValue.getClass())) {
+            if (((Class)injectableField.getGenericType()).isAssignableFrom(fieldValue.getClass())) {
                 PrivateAccessor.setField(object, injectableField, fieldValue);
+                return;
             }
         }
     }
