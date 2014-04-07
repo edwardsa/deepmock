@@ -1,10 +1,7 @@
 package com.deepmock.mockito;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
+import com.deepmock.AnnotationHelper;
+import org.mockito.Mock;
 import org.mockito.exceptions.Reporter;
 import org.mockito.exceptions.misusing.NotAMockException;
 import org.mockito.exceptions.verification.NoInteractionsWanted;
@@ -18,6 +15,13 @@ import org.mockito.internal.invocation.InvocationsFinder;
 import org.mockito.internal.stubbing.InvocationContainer;
 import org.mockito.internal.stubbing.StubbedInvocationMatcher;
 import org.mockito.internal.util.MockUtil;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import static org.mockito.internal.util.StringJoiner.join;
 
 public final class Verify {
@@ -40,6 +44,21 @@ public final class Verify {
             verifyNoMoreInteractionsOn(mock);
         }
     }
+
+    /**
+     * Verify all "when" calls have been executed on all mocks (annotated Mock) for the given test instance. Also verifies that there are no more mock
+     * interactions if requested.
+     * @param testInstance The test instance with Mock annotated fields
+     * @param verifyNoMoreInteraction Whether to verify that there are no more interaction on mocks for this test instance
+     */
+    public static void verifyAllMockExpectations(Object testInstance, boolean verifyNoMoreInteraction) {
+        Collection<Object> mockFields = AnnotationHelper.findAnnotatedFields(testInstance, Mock.class).values();
+        Verify.verifyExpectations(mockFields.toArray());
+        if (verifyNoMoreInteraction) {
+            Verify.verifyNoMoreInteractions(mockFields.toArray());
+        }
+    }
+
 
     private static void verifyNoMoreInteractionsOn(Object mock) {
         try {

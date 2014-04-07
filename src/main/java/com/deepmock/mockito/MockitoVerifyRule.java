@@ -1,11 +1,7 @@
 package com.deepmock.mockito;
 
-import com.deepmock.AnnotationHelper;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.mockito.Mock;
-
-import java.util.Collection;
 
 /**
  * Use this test rule to automatically perform a verify on all annotated mocks of your test instance
@@ -63,10 +59,6 @@ public class MockitoVerifyRule extends TestWatcher {
     }
 
     private void verifyAllMocks() {
-        Collection<Object> mockFields = AnnotationHelper.findAnnotatedFields(testInstance, Mock.class).values();
-        Verify.verifyExpectations(mockFields.toArray());
-        if (verifyNoMore) {
-            Verify.verifyNoMoreInteractions(mockFields.toArray());
-        }
+        Verify.verifyAllMockExpectations(testInstance, verifyNoMore);
     }
 }
