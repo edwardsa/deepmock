@@ -7,7 +7,7 @@
 
     <groupId>deepmock</groupId>
     <artifactId>deepmock</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
 
     <dependencies>
         <dependency>
@@ -30,13 +30,13 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.0.5.RELEASE</version>
+            <version>4.0.5.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.0.5.RELEASE</version>
+            <version>4.0.5.RELEASE</version>
         </dependency>
 
         <dependency>
