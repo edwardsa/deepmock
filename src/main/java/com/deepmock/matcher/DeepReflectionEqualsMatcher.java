@@ -1,15 +1,17 @@
 package com.deepmock.matcher;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.mockito.Matchers;
-import org.mockito.internal.matchers.Equality;
+import static org.mockito.ArgumentMatchers.argThat;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeepReflectionEqualsMatcher<T> extends BaseMatcher<T> {
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.mockito.ArgumentMatcher;
+import org.mockito.internal.matchers.Equality;
+
+public class DeepReflectionEqualsMatcher<T> extends BaseMatcher<T> implements ArgumentMatcher<T> {
     private Object value;
     private T expected;
     private boolean veryDeep;
@@ -33,7 +35,7 @@ public class DeepReflectionEqualsMatcher<T> extends BaseMatcher<T> {
      * @param <T> The type of object being tested for equality
      */
     public static <T> T refEq(T expected, boolean veryDeep) {
-        return Matchers.argThat(new DeepReflectionEqualsMatcher<T>(expected, veryDeep));
+        return argThat(new DeepReflectionEqualsMatcher<T>(expected, veryDeep));
     }
 
     public DeepReflectionEqualsMatcher(T expected, boolean veryDeep) {
@@ -41,13 +43,11 @@ public class DeepReflectionEqualsMatcher<T> extends BaseMatcher<T> {
         this.veryDeep = veryDeep;
     }
 
-    @Override
     public boolean matches(Object value) {
         this.value = value;
         return isEqualRecursive(expected, value);
     }
 
-    @Override
     public void describeTo(Description description) {
         description.appendText("refEq");
         description.appendValue(value);

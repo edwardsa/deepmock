@@ -1,11 +1,11 @@
 package com.deepmock.matcher;
 
-import org.apache.commons.lang.time.DateUtils;
+import java.util.Date;
+
+import org.apache.commons.lang3.time.DateUtils;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
-
-import java.util.Date;
 
 public final class DateMatcher extends TypeSafeMatcher<Date> {
     private Date expectedDate;
@@ -29,7 +29,6 @@ public final class DateMatcher extends TypeSafeMatcher<Date> {
         return expectedMaxDate.after(date) && expectedMinDate.before(date);
     }
 
-    @Override
     public void describeTo(Description description) {
         description.appendText("Date matching approx: " + expectedDate);
     }

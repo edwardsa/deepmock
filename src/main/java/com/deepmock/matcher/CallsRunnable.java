@@ -9,7 +9,6 @@ import org.mockito.stubbing.Answer;
  * synchronously
  */
 public class CallsRunnable implements Answer<Void> {
-    @Override
     public Void answer(InvocationOnMock invocation) throws Throwable {
         ((Runnable)invocation.getArguments()[0]).run();
         return null;

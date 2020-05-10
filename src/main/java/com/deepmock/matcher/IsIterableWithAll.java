@@ -26,7 +26,6 @@ public class IsIterableWithAll<T> extends TypeSafeDiagnosingMatcher<Iterable<? e
         return true;
     }
 
-    @Override
     public void describeTo(Description description) {
         description.appendText("iterable with all elements [")
                 .appendDescriptionOf(elemMatcher)

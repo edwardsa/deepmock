@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.internal.util.reflection.Whitebox.getInternalState;
+import org.mockito.internal.util.reflection.FieldReader;
 
 public class AnnotationHelper {
 
@@ -26,14 +26,14 @@ public class AnnotationHelper {
         Collection<Object> fields = new ArrayList<Object>();
         for (Field field : target.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(annotation)) {
-                fields.add(getInternalState(target, field.getName()));
+                fields.add(new FieldReader(target, field).read());
             }
         }
         return fields;
     }
 
     private static void addField(Object target, Field field, Map<Type, Object> fields) {
-        Object object = getInternalState(target, field.getName());
+        Object object = new FieldReader(target, field).read();
         fields.put(field.getGenericType(), object);
     }
 }

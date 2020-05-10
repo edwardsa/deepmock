@@ -31,7 +31,6 @@ import org.junit.runners.model.Statement;
  */
 public final class DeepMockRule implements MethodRule {
 
-    @Override
     public Statement apply(Statement base, FrameworkMethod method, Object target) {
         return new DeepMockStatement(base, method, target);
     }

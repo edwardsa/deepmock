@@ -1,6 +1,6 @@
 package com.deepmock;
 
-import org.mockito.internal.util.reflection.Whitebox;
+import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 import java.lang.reflect.Field;
 
@@ -16,7 +16,7 @@ public class FieldAndValue {
     }
 
     public void reset() {
-        Whitebox.setInternalState(target, field.getName(), origValue);
+        setField(target, field, origValue);
     }
 
     public boolean sameField(Object target, Field field) {

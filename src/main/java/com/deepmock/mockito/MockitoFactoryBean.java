@@ -11,17 +11,14 @@ public class MockitoFactoryBean implements FactoryBean<Object> {
         this.clazz = clazz;
     }
 
-    @Override
     public Object getObject() throws Exception {
         return Mockito.mock(clazz);
     }
 
-    @Override
     public Class<?> getObjectType() {
         return this.clazz;
     }
 
-    @Override
     public boolean isSingleton() {
         return true;
     }

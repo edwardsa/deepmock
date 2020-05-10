@@ -1,12 +1,12 @@
 
 package com.deepmock.matcher;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
-
-import java.util.Arrays;
-import java.util.Collection;
 
 public final class CollectionMatcher<T, C extends Collection<T>> extends TypeSafeMatcher<C> {
     private T[] expected;
@@ -28,7 +28,6 @@ public final class CollectionMatcher<T, C extends Collection<T>> extends TypeSaf
         return Arrays.equals(expected, collection.toArray());
     }
 
-    @Override
     public void describeTo(Description description) {
         description.appendText("Collection matching: " + Arrays.toString(expected));
     }

@@ -1,28 +1,31 @@
 package com.deepmock.mockito;
 
+import static org.mockito.internal.util.StringUtil.join;
+
 import com.deepmock.AnnotationHelper;
-import org.mockito.Mock;
-import org.mockito.exceptions.Reporter;
-import org.mockito.exceptions.misusing.NotAMockException;
-import org.mockito.exceptions.verification.NoInteractionsWanted;
-import org.mockito.exceptions.verification.WantedButNotInvoked;
-import org.mockito.internal.MockHandlerInterface;
-import org.mockito.internal.debugging.Location;
-import org.mockito.internal.exceptions.base.StackTraceFilter;
-import org.mockito.internal.invocation.Invocation;
-import org.mockito.internal.invocation.InvocationMarker;
-import org.mockito.internal.invocation.InvocationsFinder;
-import org.mockito.internal.stubbing.InvocationContainer;
-import org.mockito.internal.stubbing.StubbedInvocationMatcher;
-import org.mockito.internal.util.MockUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.mockito.internal.util.StringJoiner.join;
+import org.mockito.Mock;
+import org.mockito.exceptions.misusing.NotAMockException;
+import org.mockito.exceptions.verification.NoInteractionsWanted;
+import org.mockito.exceptions.verification.WantedButNotInvoked;
+import org.mockito.internal.debugging.LocationImpl;
+import org.mockito.internal.exceptions.Reporter;
+import org.mockito.internal.exceptions.stacktrace.StackTraceFilter;
+import org.mockito.internal.invocation.InvocationMarker;
+import org.mockito.internal.invocation.InvocationsFinder;
+import org.mockito.internal.stubbing.InvocationContainerImpl;
+import org.mockito.internal.stubbing.StubbedInvocationMatcher;
+import org.mockito.internal.util.MockUtil;
+import org.mockito.invocation.Invocation;
+import org.mockito.invocation.Location;
+import org.mockito.invocation.MockHandler;
+import org.mockito.mock.MockCreationSettings;
 
 public final class Verify {
 
@@ -63,44 +66,43 @@ public final class Verify {
     private static void verifyNoMoreInteractionsOn(Object mock) {
         try {
             if (mock == null) {
-                new Reporter().nullPassedToVerifyNoMoreInteractions();
+                throw Reporter.nullPassedToVerifyNoMoreInteractions();
             }
             Invocation unverified = getFirstUnverifiedInvocation(mock);
             if (unverified != null) {
                 throw new NoInteractionsWanted(buildNoMoreInteractionsMessage(unverified));
             }
         } catch (NotAMockException e) {
-            new Reporter().notAMockPassedToVerifyNoMoreInteractions();
+            throw Reporter.notAMockPassedToVerifyNoMoreInteractions();
         }
     }
 
     private static Invocation getFirstUnverifiedInvocation(Object mock) {
-        MockHandlerInterface<Object> mockHandler = new MockUtil().getMockHandler(mock);
-        List<Invocation> allInvocations = mockHandler.getInvocationContainer().getInvocations();
-        Invocation unverified = new InvocationsFinder().findFirstUnverified(allInvocations);
-        return unverified;
+        MockHandler<Object> mockHandler = MockUtil.getMockHandler(mock);
+        MockCreationSettings<Object> mockSettings = mockHandler.getMockSettings();
+        InvocationContainerImpl invocationContainer = new InvocationContainerImpl(mockSettings);
+        return InvocationsFinder.findFirstUnverified(invocationContainer.getInvocations());
     }
 
     private static void verifyExpectationsOn(Object mock) {
-        InvocationContainer invocationContainer = new MockUtil().getMockHandler(mock).getInvocationContainer();
-        List<StubbedInvocationMatcher> invocationMatchers = getStubbedInvocationsInOrder(invocationContainer);
+        MockCreationSettings<Object> mockSettings =
+                MockUtil.getMockHandler(mock).getMockSettings();
+        InvocationContainerImpl invocationContainer = new InvocationContainerImpl(mockSettings);
+        List<StubbedInvocationMatcher> invocationMatchers =
+                getStubbedInvocationsInOrder(invocationContainer);
         for (StubbedInvocationMatcher invocationMatcher : invocationMatchers) {
             verifyInvoked(invocationMatcher, invocationContainer);
         }
     }
 
-    private static List<StubbedInvocationMatcher> getStubbedInvocationsInOrder(InvocationContainer container) {
-        List<StubbedInvocationMatcher> sorted = new ArrayList<StubbedInvocationMatcher>(container.getStubbedInvocations());
-        Collections.sort(sorted, new Comparator<StubbedInvocationMatcher>() {
-            @Override
-            public int compare(StubbedInvocationMatcher o1, StubbedInvocationMatcher o2) {
-                return o1.getInvocation().getSequenceNumber() - o2.getInvocation().getSequenceNumber();
-            }
-        });
-        return sorted;
+    private static List<StubbedInvocationMatcher> getStubbedInvocationsInOrder(InvocationContainerImpl container) {
+        return container.getInvocations().stream().map(container::findAnswerFor)
+                .sorted(Comparator.comparingInt(o -> o.getInvocation().getSequenceNumber()))
+                .collect(Collectors.toList());
     }
 
-    private static void verifyInvoked(StubbedInvocationMatcher invocationMatcher, InvocationContainer container) {
+    private static void verifyInvoked(StubbedInvocationMatcher invocationMatcher,
+                                      InvocationContainerImpl container) {
         if (invocationMatcher.wasUsed()) {
             markVerified(invocationMatcher, container);
         } else {
@@ -109,12 +111,13 @@ public final class Verify {
         }
     }
 
-    private static String buildWantedMessage(StubbedInvocationMatcher stubbedMatcher, InvocationContainer container) {
+    private static String buildWantedMessage(StubbedInvocationMatcher stubbedMatcher,
+                                             InvocationContainerImpl container) {
         Invocation invocation = stubbedMatcher.getInvocation();
-        StringBuffer message = new StringBuffer("\nexpected method call: " + stubbedMatcher.toString() + "\n" );
+        StringBuilder message = new StringBuilder("\nexpected method call: " + stubbedMatcher.toString() + "\n" );
         Invocation similar = findSimilar(stubbedMatcher, container.getInvocations());
         if (similar != null) {
-            message.append("actual method call => " + similar);
+            message.append("actual method call => ").append(similar);
         } else {
             message.append("but never called");
         }
@@ -135,20 +138,21 @@ public final class Verify {
     }
 
     private static Invocation findSimilar(StubbedInvocationMatcher stubbedMatcher, List<Invocation> invocations) {
-        return new InvocationsFinder().findSimilarInvocation(invocations, stubbedMatcher);
+        return InvocationsFinder.findSimilarInvocation(invocations, stubbedMatcher);
     }
 
-    private static void markVerified(StubbedInvocationMatcher stubbedInvocation, InvocationContainer container) {
+    private static void markVerified(StubbedInvocationMatcher stubbedInvocation,
+                                     InvocationContainerImpl container) {
         List<Invocation> invs = container.getInvocations();
         for (Invocation inv : invs) {
             if (stubbedInvocation.matches(inv)) {
-                new InvocationMarker().markVerified(inv, stubbedInvocation);
+                InvocationMarker.markVerified(inv, stubbedInvocation);
             }
         }
     }
 
     private static Location getLocation() {
-        return new Location(new StackTraceFilter() {
+        return new LocationImpl(new StackTraceFilter() {
             @Override
             public StackTraceElement[] filter(StackTraceElement[] target, boolean keepTop) {
                 StackTraceElement[] firstFiltered = super.filter(target, keepTop);

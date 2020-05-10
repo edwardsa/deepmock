@@ -32,7 +32,6 @@ public final class BeanPropertyMatcher<T> extends TypeSafeMatcher<T> {
         }
     }
 
-    @Override
     public void describeTo(Description description) {
         description.appendText("property " + propertyName + " matching: ");
         description.appendDescriptionOf(expectedValue);

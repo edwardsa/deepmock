@@ -26,7 +26,6 @@ public final class RegexMatcher extends TypeSafeMatcher<String> {
         }
     }
 
-    @Override
     public void describeTo(Description description) {
         description.appendText("String matching: " + pattern);
     }

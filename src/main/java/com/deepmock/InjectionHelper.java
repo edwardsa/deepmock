@@ -1,18 +1,19 @@
 package com.deepmock;
 
 import com.deepmock.reflect.PrivateAccessor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ReflectionUtils;
 
-import javax.annotation.Resource;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Resource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ReflectionUtils;
 
 public class InjectionHelper {
     private static Log LOG = LogFactory.getLog(InjectionHelper.class);
@@ -37,7 +38,6 @@ public class InjectionHelper {
     private static List<Field> getAutowiredFields(Object target) {
         final List<Field> fields = new ArrayList<Field>();
         ReflectionUtils.doWithFields(target.getClass(), new ReflectionUtils.FieldCallback() {
-            @Override
             public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
                 if (field.isAnnotationPresent(Resource.class) || field.isAnnotationPresent(Autowired.class)) {
                     fields.add(field);
