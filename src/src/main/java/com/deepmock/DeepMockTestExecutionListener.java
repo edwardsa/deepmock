@@ -1,9 +1,9 @@
 package com.deepmock;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DeepMockTestExecutionListener extends AbstractTestExecutionListener {
     private DeepMockHandler deepMockHandler;

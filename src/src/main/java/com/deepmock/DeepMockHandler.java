@@ -98,7 +98,7 @@ public final class DeepMockHandler {
      * </ul>
      */
     private void recurseObjectGraphInjectingMocks(Object target, Map<Type, Object> mocks, List<Class> classStack,
-                                                  boolean onlySpringFields) {
+            boolean onlySpringFields) {
         if (target == null || mocks.isEmpty()) {
             return;
         }

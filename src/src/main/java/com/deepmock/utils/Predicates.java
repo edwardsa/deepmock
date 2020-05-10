@@ -1,7 +1,6 @@
 package com.deepmock.utils;
 
 import com.google.common.base.Predicate;
-
 import org.apache.commons.lang3.time.StopWatch;
 
 /**

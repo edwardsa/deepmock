@@ -1,11 +1,11 @@
 package com.deepmock;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import org.junit.runner.Description;
 import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.mockito.MockitoAnnotations.initMocks;
 
 
 /**
